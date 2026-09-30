@@ -1,0 +1,15 @@
+flowchart TD
+    S([Start]) --> A[Librarian chooses book, member,<br/>loan date and due date]
+    A --> B{Book and member chosen,<br/>dates filled in?}
+    B -- No --> E1[Show 'required' messages]
+    E1 --> Z([End])
+    B -- Yes --> C{Due date before loan date?}
+    C -- Yes --> E2[Show 'Due date cannot be<br/>before the loan date']
+    E2 --> Z
+    C -- No --> D[Count active loans of this book]
+    D --> F{Active loans < quantity?}
+    F -- No --> E3[Show 'No free copies']
+    E3 --> Z
+    F -- Yes --> G[Save the loan]
+    G --> H[Show loan list with success message]
+    H --> Z

@@ -1,0 +1,11 @@
+flowchart TD
+    S([Start]) --> A[User fills in the form and clicks Save]
+    A --> B{Are all fields valid?<br/>required, format, ranges}
+    B -- No --> E1[Show the form again<br/>with red messages under the fields]
+    E1 --> Z([End])
+    B -- Yes --> C{Business rules OK?<br/>unique values, free copy, dates}
+    C -- No --> E2[Show the form again<br/>with the rule message]
+    E2 --> Z
+    C -- Yes --> D[Save the record in MySQL]
+    D --> F[Open the list page<br/>with a green success message]
+    F --> Z

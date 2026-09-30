@@ -1,0 +1,7 @@
+flowchart LR
+    U[Browser] -->|HTTP GET/POST| C[Controllers]
+    C -->|calls| S[Services<br/>business rules]
+    S -->|calls| R[Repositories]
+    R -->|SQL via JPA/Hibernate| DB[(MySQL)]
+    C -->|model data| V[Thymeleaf templates]
+    V -->|HTML page| U

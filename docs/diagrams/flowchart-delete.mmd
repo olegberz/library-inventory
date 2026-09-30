@@ -1,0 +1,14 @@
+flowchart TD
+    S([Start]) --> A[User clicks Delete]
+    A --> B{Confirm in the browser dialog?}
+    B -- Cancel --> X[Nothing changes]
+    X --> Z([End])
+    B -- OK --> C{Record exists?}
+    C -- No --> E1[Show 'not found' page]
+    E1 --> Z
+    C -- Yes --> D{Is it used by other records?<br/>e.g. author with books}
+    D -- Yes --> E2[Show red message,<br/>record is kept]
+    E2 --> Z
+    D -- No --> F[DELETE row in MySQL]
+    F --> G[Show list with success message]
+    G --> Z

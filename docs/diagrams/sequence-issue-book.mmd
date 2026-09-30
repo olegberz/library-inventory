@@ -1,0 +1,27 @@
+sequenceDiagram
+    actor L as Librarian
+    participant B as Browser
+    participant C as LoanController
+    participant S as LoanService
+    participant R as LoanRepository
+    participant DB as MySQL
+
+    L->>B: fills "Issue book" form, clicks Save
+    B->>C: POST /loans (book, member, dates)
+    C->>C: validate fields (@Valid)
+    C->>S: create(loan)
+    S->>S: check due date >= loan date
+    S->>R: countByBookIdAndReturnDateIsNull(bookId)
+    R->>DB: SELECT COUNT(*) FROM loans WHERE ...
+    DB-->>R: number of active loans
+    R-->>S: count
+    alt count < quantity
+        S->>R: save(loan)
+        R->>DB: INSERT INTO loans ...
+        S-->>C: saved loan
+        C-->>B: redirect to /loans + success message
+    else no free copy
+        S-->>C: BusinessRuleException
+        C-->>B: form again with error message
+    end
+    B-->>L: shows result
