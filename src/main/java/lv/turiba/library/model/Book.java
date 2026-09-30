@@ -5,6 +5,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -14,8 +16,9 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * One book title in the library inventory.
- * Maps to the "books" table in MySQL (see docker/mysql/init.sql).
+ * One book title in the library inventory. Table: books.
+ * "quantity" is the number of physical copies the library owns;
+ * copies that are on loan are counted from the loans table.
  */
 @Entity
 @Table(name = "books")
@@ -30,20 +33,20 @@ public class Book {
     @Column(nullable = false, length = 200)
     private String title;
 
-    @NotBlank(message = "Author is required")
-    @Size(max = 150, message = "Author must be at most 150 characters")
-    @Column(nullable = false, length = 150)
-    private String author;
+    @NotNull(message = "Author is required")
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private Author author;
+
+    @NotNull(message = "Genre is required")
+    @ManyToOne
+    @JoinColumn(name = "genre_id", nullable = false)
+    private Genre genre;
 
     @NotBlank(message = "ISBN is required")
     @Pattern(regexp = "\\d{10}|\\d{13}", message = "ISBN must contain 10 or 13 digits (no dashes)")
     @Column(nullable = false, unique = true, length = 13)
     private String isbn;
-
-    @NotBlank(message = "Genre is required")
-    @Size(max = 50, message = "Genre must be at most 50 characters")
-    @Column(nullable = false, length = 50)
-    private String genre;
 
     @NotNull(message = "Publication year is required")
     @Min(value = 1450, message = "Year must be 1450 or later")
@@ -64,12 +67,12 @@ public class Book {
     public Book() {
     }
 
-    public Book(String title, String author, String isbn, String genre,
+    public Book(String title, Author author, Genre genre, String isbn,
                 Integer publishedYear, Integer quantity, String shelfLocation) {
         this.title = title;
         this.author = author;
-        this.isbn = isbn;
         this.genre = genre;
+        this.isbn = isbn;
         this.publishedYear = publishedYear;
         this.quantity = quantity;
         this.shelfLocation = shelfLocation;
@@ -81,14 +84,14 @@ public class Book {
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
+    public Author getAuthor() { return author; }
+    public void setAuthor(Author author) { this.author = author; }
+
+    public Genre getGenre() { return genre; }
+    public void setGenre(Genre genre) { this.genre = genre; }
 
     public String getIsbn() { return isbn; }
     public void setIsbn(String isbn) { this.isbn = isbn; }
-
-    public String getGenre() { return genre; }
-    public void setGenre(String genre) { this.genre = genre; }
 
     public Integer getPublishedYear() { return publishedYear; }
     public void setPublishedYear(Integer publishedYear) { this.publishedYear = publishedYear; }

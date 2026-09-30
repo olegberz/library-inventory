@@ -1,7 +1,10 @@
 package lv.turiba.library.service;
 
+import lv.turiba.library.model.Author;
 import lv.turiba.library.model.Book;
+import lv.turiba.library.model.Genre;
 import lv.turiba.library.repository.BookRepository;
+import lv.turiba.library.repository.LoanRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -16,67 +19,65 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-/**
- * Unit tests for the CRUD business rules.
- * The repository is mocked, so no database is needed to run them.
- */
+/** Unit tests for BookService. Repositories are mocked, no database is needed. */
 class BookServiceTest {
 
-    private BookRepository repository;
+    private BookRepository books;
+    private LoanRepository loans;
     private BookService service;
 
     @BeforeEach
     void setUp() {
-        repository = mock(BookRepository.class);
-        service = new BookService(repository);
+        books = mock(BookRepository.class);
+        loans = mock(LoanRepository.class);
+        service = new BookService(books, loans);
     }
 
-    private Book sampleBook() {
-        return new Book("Clean Code", "Robert C. Martin", "9780132350884",
-                "Programming", 2008, 2, "A-03");
+    static Book sampleBook() {
+        Author author = new Author("Robert C.", "Martin", "USA", 1952);
+        Genre genre = new Genre("Programming", null);
+        return new Book("Clean Code", author, genre, "9780132350884", 2008, 2, "A-03");
     }
 
     @Test
     void createSavesNewBook() {
         Book book = sampleBook();
-        when(repository.existsByIsbn(book.getIsbn())).thenReturn(false);
-        when(repository.save(book)).thenReturn(book);
+        when(books.existsByIsbn(book.getIsbn())).thenReturn(false);
+        when(books.save(book)).thenReturn(book);
 
-        Book saved = service.create(book);
-
-        assertEquals("Clean Code", saved.getTitle());
-        verify(repository).save(book);
+        assertEquals("Clean Code", service.create(book).getTitle());
+        verify(books).save(book);
     }
 
     @Test
     void createRejectsDuplicateIsbn() {
         Book book = sampleBook();
-        when(repository.existsByIsbn(book.getIsbn())).thenReturn(true);
+        when(books.existsByIsbn(book.getIsbn())).thenReturn(true);
 
-        assertThrows(DuplicateIsbnException.class, () -> service.create(book));
-        verify(repository, never()).save(any());
+        BusinessRuleException e = assertThrows(BusinessRuleException.class, () -> service.create(book));
+        assertEquals("isbn", e.getField());
+        verify(books, never()).save(any());
     }
 
     @Test
     void findAllWithoutSearchReturnsEverything() {
-        when(repository.findAllByOrderByTitleAsc()).thenReturn(List.of(sampleBook()));
+        when(books.findAllByOrderByTitleAsc()).thenReturn(List.of(sampleBook()));
 
         assertEquals(1, service.findAll("  ").size());
     }
 
     @Test
-    void findAllWithSearchUsesFilter() {
-        when(repository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCaseOrderByTitleAsc("martin", "martin"))
-                .thenReturn(List.of(sampleBook()));
+    void findAllWithSearchTrimsText() {
+        when(books.search("martin")).thenReturn(List.of(sampleBook()));
 
         assertEquals(1, service.findAll(" martin ").size());
     }
 
     @Test
     void findByIdThrowsWhenMissing() {
-        when(repository.findById(99L)).thenReturn(Optional.empty());
+        when(books.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(BookNotFoundException.class, () -> service.findById(99L));
+        assertThrows(NotFoundException.class, () -> service.findById(99L));
     }
 
     @Test
@@ -86,10 +87,9 @@ class BookServiceTest {
         Book changes = sampleBook();
         changes.setQuantity(7);
         changes.setShelfLocation("B-02");
-
-        when(repository.findById(1L)).thenReturn(Optional.of(existing));
-        when(repository.existsByIsbnAndIdNot(changes.getIsbn(), 1L)).thenReturn(false);
-        when(repository.save(existing)).thenReturn(existing);
+        when(books.findById(1L)).thenReturn(Optional.of(existing));
+        when(loans.countByBookIdAndReturnDateIsNull(1L)).thenReturn(0L);
+        when(books.save(existing)).thenReturn(existing);
 
         Book updated = service.update(1L, changes);
 
@@ -98,14 +98,39 @@ class BookServiceTest {
     }
 
     @Test
-    void deleteRemovesExistingBook() {
+    void updateRejectsQuantityBelowCopiesOnLoan() {
         Book existing = sampleBook();
         existing.setId(1L);
-        when(repository.findById(1L)).thenReturn(Optional.of(existing));
+        Book changes = sampleBook();
+        changes.setQuantity(1);
+        when(books.findById(1L)).thenReturn(Optional.of(existing));
+        when(loans.countByBookIdAndReturnDateIsNull(1L)).thenReturn(2L);
+
+        BusinessRuleException e = assertThrows(BusinessRuleException.class, () -> service.update(1L, changes));
+        assertEquals("quantity", e.getField());
+    }
+
+    @Test
+    void deleteRemovesBookWithoutLoans() {
+        Book existing = sampleBook();
+        existing.setId(1L);
+        when(books.findById(1L)).thenReturn(Optional.of(existing));
+        when(loans.existsByBookId(1L)).thenReturn(false);
 
         service.delete(1L);
 
-        verify(repository).delete(existing);
+        verify(books).delete(existing);
+    }
+
+    @Test
+    void deleteRejectsBookWithLoans() {
+        Book existing = sampleBook();
+        existing.setId(1L);
+        when(books.findById(1L)).thenReturn(Optional.of(existing));
+        when(loans.existsByBookId(1L)).thenReturn(true);
+
+        assertThrows(BusinessRuleException.class, () -> service.delete(1L));
+        verify(books, never()).delete(any());
     }
 
     @Test

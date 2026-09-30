@@ -2,76 +2,84 @@ package lv.turiba.library.service;
 
 import lv.turiba.library.model.Book;
 import lv.turiba.library.repository.BookRepository;
+import lv.turiba.library.repository.LoanRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 /**
- * Business logic for the four CRUD operations.
- * The controller never talks to the repository directly.
+ * CRUD for books.
+ * Rules: ISBN is unique; quantity cannot drop below the number of copies on loan;
+ * a book with loan history cannot be deleted.
  */
 @Service
 public class BookService {
 
-    private final BookRepository repository;
+    private final BookRepository books;
+    private final LoanRepository loans;
 
-    public BookService(BookRepository repository) {
-        this.repository = repository;
+    public BookService(BookRepository books, LoanRepository loans) {
+        this.books = books;
+        this.loans = loans;
     }
 
-    /** READ: all books, or only those whose title/author contains the search text. */
+    /** All books, or only those whose title/author contains the search text. */
     public List<Book> findAll(String search) {
         if (search == null || search.isBlank()) {
-            return repository.findAllByOrderByTitleAsc();
+            return books.findAllByOrderByTitleAsc();
         }
-        String text = search.trim();
-        return repository.findByTitleContainingIgnoreCaseOrAuthorContainingIgnoreCaseOrderByTitleAsc(text, text);
+        return books.search(search.trim());
     }
 
-    /** READ: one book by id. */
     public Book findById(Long id) {
-        return repository.findById(id).orElseThrow(() -> new BookNotFoundException(id));
+        return books.findById(id).orElseThrow(() -> new NotFoundException("Book", id));
     }
 
-    /** CREATE: add a new book. ISBN must be unique. */
     @Transactional
     public Book create(Book book) {
-        if (repository.existsByIsbn(book.getIsbn())) {
-            throw new DuplicateIsbnException(book.getIsbn());
+        if (books.existsByIsbn(book.getIsbn())) {
+            throw new BusinessRuleException("isbn", "A book with ISBN " + book.getIsbn() + " already exists");
         }
         book.setId(null);
-        return repository.save(book);
+        return books.save(book);
     }
 
-    /** UPDATE: overwrite the fields of an existing book. */
     @Transactional
     public Book update(Long id, Book changes) {
         Book existing = findById(id);
-        if (repository.existsByIsbnAndIdNot(changes.getIsbn(), id)) {
-            throw new DuplicateIsbnException(changes.getIsbn());
+        if (books.existsByIsbnAndIdNot(changes.getIsbn(), id)) {
+            throw new BusinessRuleException("isbn", "A book with ISBN " + changes.getIsbn() + " already exists");
+        }
+        long onLoan = loans.countByBookIdAndReturnDateIsNull(id);
+        if (changes.getQuantity() < onLoan) {
+            throw new BusinessRuleException("quantity",
+                    "Quantity cannot be less than " + onLoan + " (copies currently on loan)");
         }
         existing.setTitle(changes.getTitle());
         existing.setAuthor(changes.getAuthor());
-        existing.setIsbn(changes.getIsbn());
         existing.setGenre(changes.getGenre());
+        existing.setIsbn(changes.getIsbn());
         existing.setPublishedYear(changes.getPublishedYear());
         existing.setQuantity(changes.getQuantity());
         existing.setShelfLocation(changes.getShelfLocation());
-        return repository.save(existing);
+        return books.save(existing);
     }
 
-    /** DELETE: remove a book from the inventory. */
     @Transactional
     public void delete(Long id) {
         Book existing = findById(id);
-        repository.delete(existing);
+        if (loans.existsByBookId(id)) {
+            throw new BusinessRuleException("\"" + existing.getTitle()
+                    + "\" has loan records and cannot be deleted");
+        }
+        books.delete(existing);
     }
 
-    /** Total number of copies across all titles (shown on the list page). */
-    public int totalCopies(List<Book> books) {
+    /** Total number of copies across the given books. */
+    public int totalCopies(List<Book> list) {
         int total = 0;
-        for (Book book : books) {
+        for (Book book : list) {
             total += book.getQuantity();
         }
         return total;
