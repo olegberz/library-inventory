@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Books – ABC Library</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <div class="container">
+        <a class="brand" th:href="@{/books}">ABC Library · Inventory</a>
+    </div>
+</header>
+
+<main class="container">
+    <div th:if="${message}" class="alert success" th:text="${message}">Saved.</div>
+    <div th:if="${error}" class="alert error" th:text="${error}">Error.</div>
+
+    <div class="page-head">
+        <h1>Books</h1>
+        <a class="btn primary" th:href="@{/books/new}">Add book</a>
+    </div>
+
+    <form class="search" th:action="@{/books}" method="get">
+        <input type="text" name="search" th:value="${search}" placeholder="Search by title or author">
+        <button class="btn" type="submit">Search</button>
+        <a class="btn" th:if="${search}" th:href="@{/books}">Clear</a>
+    </form>
+
+    <p class="summary">
+        <span th:text="${books.size()}">0</span> titles,
+        <span th:text="${totalCopies}">0</span> copies in total
+    </p>
+
+    <table th:if="${!books.isEmpty()}">
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Genre</th>
+            <th class="num">Year</th>
+            <th class="num">Qty</th>
+            <th>Shelf</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.title}">Title</td>
+            <td th:text="${book.author}">Author</td>
+            <td class="mono" th:text="${book.isbn}">ISBN</td>
+            <td th:text="${book.genre}">Genre</td>
+            <td class="num" th:text="${book.publishedYear}">2020</td>
+            <td class="num" th:classappend="${book.quantity == 0} ? 'out'" th:text="${book.quantity}">1</td>
+            <td th:text="${book.shelfLocation}">A-01</td>
+            <td class="actions">
+                <a class="btn small" th:href="@{/books/{id}/edit(id=${book.id})}">Edit</a>
+                <form th:action="@{/books/{id}/delete(id=${book.id})}" method="post"
+                      onsubmit="return confirm('Delete this book?');">
+                    <button class="btn small danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p th:if="${books.isEmpty()}" class="empty">No books found.</p>
+</main>
+</body>
+</html>
