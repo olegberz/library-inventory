@@ -148,7 +148,7 @@ What this does:
 - downloads the `mysql:8.4` image (first time only),
 - creates database `library_db` and user `library_user` / `library_pass`,
 - runs `docker/mysql/init.sql`, which creates the `books` table and inserts 8 sample books,
-- publishes MySQL on `localhost:3306`.
+- publishes MySQL on `localhost:3307`.
 
 Check that it is healthy:
 
@@ -158,9 +158,9 @@ docker compose ps
 
 The `library-db` line must show `healthy` (takes 10–30 seconds on the first start).
 
-> If port 3306 is already taken by a locally installed MySQL, stop that MySQL service first,
-> or change `"3306:3306"` to `"3307:3306"` in `docker-compose.yml` and set
-> `spring.datasource.url=jdbc:mysql://localhost:3307/library_db` in `application.properties`.
+> MySQL is published on host port **3307** (not the default 3306), so it does not clash
+> with a MySQL server that may already be installed on your computer. Inside Docker the
+> app still talks to the database on port 3306.
 
 ### Step 5 – Run the application from IntelliJ
 
