@@ -1,21 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Books – ABC Library</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head('Books')}"></head>
 <body>
-<header class="topbar">
-    <div class="container">
-        <a class="brand" th:href="@{/books}">ABC Library · Inventory</a>
-    </div>
-</header>
+<header th:replace="~{fragments/layout :: header('books')}"></header>
 
 <main class="container">
-    <div th:if="${message}" class="alert success" th:text="${message}">Saved.</div>
-    <div th:if="${error}" class="alert error" th:text="${error}">Error.</div>
+    <div th:replace="~{fragments/layout :: messages}"></div>
 
     <div class="page-head">
         <h1>Books</h1>
@@ -38,10 +28,11 @@
         <tr>
             <th>Title</th>
             <th>Author</th>
-            <th>ISBN</th>
             <th>Genre</th>
+            <th>ISBN</th>
             <th class="num">Year</th>
-            <th class="num">Qty</th>
+            <th class="num">Copies</th>
+            <th class="num">Available</th>
             <th>Shelf</th>
             <th></th>
         </tr>
@@ -49,11 +40,13 @@
         <tbody>
         <tr th:each="book : ${books}">
             <td th:text="${book.title}">Title</td>
-            <td th:text="${book.author}">Author</td>
+            <td th:text="${book.author.fullName}">Author</td>
+            <td th:text="${book.genre.name}">Genre</td>
             <td class="mono" th:text="${book.isbn}">ISBN</td>
-            <td th:text="${book.genre}">Genre</td>
             <td class="num" th:text="${book.publishedYear}">2020</td>
-            <td class="num" th:classappend="${book.quantity == 0} ? 'out'" th:text="${book.quantity}">1</td>
+            <td class="num" th:text="${book.quantity}">1</td>
+            <td class="num" th:classappend="${available[book.id] == 0} ? 'out'"
+                th:text="${available[book.id]}">1</td>
             <td th:text="${book.shelfLocation}">A-01</td>
             <td class="actions">
                 <a class="btn small" th:href="@{/books/{id}/edit(id=${book.id})}">Edit</a>

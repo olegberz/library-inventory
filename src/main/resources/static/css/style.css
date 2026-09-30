@@ -14,8 +14,12 @@ body {
 .container.narrow { max-width: 620px; }
 
 .topbar { background: #fff; border-bottom: 1px solid #d8dde3; }
-.topbar .container { height: 52px; display: flex; align-items: center; }
+.topbar .container { height: 52px; display: flex; align-items: center; gap: 28px; }
 .brand { font-weight: 600; color: #1f2328; text-decoration: none; }
+nav { display: flex; gap: 4px; }
+nav a { padding: 6px 10px; border-radius: 4px; color: #444c56; text-decoration: none; }
+nav a:hover { background: #eef1f4; }
+nav a.active { background: #e3eaf2; color: #2f5d8a; font-weight: 600; }
 
 h1 { font-size: 22px; margin: 28px 0 16px; }
 
@@ -64,8 +68,14 @@ td.mono { font-family: Consolas, monospace; font-size: 13px; }
 td.actions { white-space: nowrap; text-align: right; }
 td.actions form { display: inline; }
 
+/* Loan status */
+.status { font-size: 13px; font-weight: 600; }
+.status.onloan { color: #2f5d8a; }
+.status.overdue { color: #b42318; }
+.status.returned { color: #57606a; font-weight: 400; }
+
 /* Form */
-input[type=text], input[type=number] {
+input[type=text], input[type=number], input[type=date], select {
     width: 100%;
     padding: 7px 10px;
     border: 1px solid #c4cbd3;
@@ -73,17 +83,22 @@ input[type=text], input[type=number] {
     font: inherit;
     background: #fff;
 }
-input:focus { outline: 2px solid #9db7d3; outline-offset: 0; border-color: #2f5d8a; }
-input.invalid { border-color: #b42318; }
+input:focus, select:focus { outline: 2px solid #9db7d3; outline-offset: 0; border-color: #2f5d8a; }
+input.invalid, select.invalid { border-color: #b42318; }
 
-.book-form { background: #fff; border: 1px solid #d8dde3; border-radius: 4px; padding: 20px; }
-.book-form label { display: block; font-weight: 600; font-size: 13px; margin: 14px 0 4px; }
-.book-form label:first-child { margin-top: 0; }
-.book-form .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.edit-form { background: #fff; border: 1px solid #d8dde3; border-radius: 4px; padding: 20px; }
+.edit-form label { display: block; font-weight: 600; font-size: 13px; margin: 14px 0 4px; }
+.edit-form > label:first-of-type { margin-top: 0; }
+.edit-form .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+.edit-form .row.two { grid-template-columns: 1fr 1fr; }
+.edit-form .alert { margin: 0 0 14px; }
+.hint { font-weight: 400; color: #6e7781; }
 .field-error { color: #b42318; font-size: 13px; margin: 4px 0 0; }
 .form-actions { margin-top: 20px; display: flex; gap: 8px; }
 
 @media (max-width: 700px) {
     table { display: block; overflow-x: auto; }
-    .book-form .row { grid-template-columns: 1fr; }
+    .topbar .container { height: auto; flex-wrap: wrap; gap: 8px; padding-top: 10px; padding-bottom: 10px; }
+    nav { flex-wrap: wrap; }
+    .edit-form .row, .edit-form .row.two { grid-template-columns: 1fr; }
 }

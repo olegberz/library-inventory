@@ -1,58 +1,54 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title th:text="${formTitle} + ' – ABC Library'">Book – ABC Library</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
+<head th:replace="~{fragments/layout :: head(${formTitle})}"></head>
 <body>
-<header class="topbar">
-    <div class="container">
-        <a class="brand" th:href="@{/books}">ABC Library · Inventory</a>
-    </div>
-</header>
+<header th:replace="~{fragments/layout :: header('books')}"></header>
 
 <main class="container narrow">
     <h1 th:text="${formTitle}">Add book</h1>
 
-    <form class="book-form" th:action="@{${formAction}}" th:object="${book}" method="post" novalidate>
+    <form class="edit-form" th:action="@{${formAction}}" th:object="${book}" method="post" novalidate>
+        <div class="alert error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></div>
 
         <label for="title">Title</label>
-        <input id="title" type="text" th:field="*{title}" th:classappend="${#fields.hasErrors('title')} ? 'invalid'">
-        <p class="field-error" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+        <input id="title" type="text" th:field="*{title}" th:errorclass="invalid">
+        <p class="field-error" th:errors="*{title}"></p>
 
         <label for="author">Author</label>
-        <input id="author" type="text" th:field="*{author}" th:classappend="${#fields.hasErrors('author')} ? 'invalid'">
-        <p class="field-error" th:if="${#fields.hasErrors('author')}" th:errors="*{author}"></p>
-
-        <label for="isbn">ISBN</label>
-        <input id="isbn" type="text" th:field="*{isbn}" placeholder="10 or 13 digits"
-               th:classappend="${#fields.hasErrors('isbn')} ? 'invalid'">
-        <p class="field-error" th:if="${#fields.hasErrors('isbn')}" th:errors="*{isbn}"></p>
+        <select id="author" name="author" th:classappend="${#fields.hasErrors('author')} ? 'invalid'">
+            <option value="">– choose author –</option>
+            <option th:each="a : ${authors}" th:value="${a.id}" th:text="${a.fullName}"
+                    th:selected="${book.author != null and book.author.id == a.id}">Author</option>
+        </select>
+        <p class="field-error" th:errors="*{author}"></p>
 
         <label for="genre">Genre</label>
-        <input id="genre" type="text" th:field="*{genre}" th:classappend="${#fields.hasErrors('genre')} ? 'invalid'">
-        <p class="field-error" th:if="${#fields.hasErrors('genre')}" th:errors="*{genre}"></p>
+        <select id="genre" name="genre" th:classappend="${#fields.hasErrors('genre')} ? 'invalid'">
+            <option value="">– choose genre –</option>
+            <option th:each="g : ${genres}" th:value="${g.id}" th:text="${g.name}"
+                    th:selected="${book.genre != null and book.genre.id == g.id}">Genre</option>
+        </select>
+        <p class="field-error" th:errors="*{genre}"></p>
+
+        <label for="isbn">ISBN</label>
+        <input id="isbn" type="text" th:field="*{isbn}" placeholder="10 or 13 digits" th:errorclass="invalid">
+        <p class="field-error" th:errors="*{isbn}"></p>
 
         <div class="row">
             <div>
                 <label for="publishedYear">Year</label>
-                <input id="publishedYear" type="number" th:field="*{publishedYear}"
-                       th:classappend="${#fields.hasErrors('publishedYear')} ? 'invalid'">
-                <p class="field-error" th:if="${#fields.hasErrors('publishedYear')}" th:errors="*{publishedYear}"></p>
+                <input id="publishedYear" type="number" th:field="*{publishedYear}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{publishedYear}"></p>
             </div>
             <div>
-                <label for="quantity">Quantity</label>
-                <input id="quantity" type="number" min="0" th:field="*{quantity}"
-                       th:classappend="${#fields.hasErrors('quantity')} ? 'invalid'">
-                <p class="field-error" th:if="${#fields.hasErrors('quantity')}" th:errors="*{quantity}"></p>
+                <label for="quantity">Copies</label>
+                <input id="quantity" type="number" min="0" th:field="*{quantity}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{quantity}"></p>
             </div>
             <div>
                 <label for="shelfLocation">Shelf</label>
-                <input id="shelfLocation" type="text" th:field="*{shelfLocation}" placeholder="A-01"
-                       th:classappend="${#fields.hasErrors('shelfLocation')} ? 'invalid'">
-                <p class="field-error" th:if="${#fields.hasErrors('shelfLocation')}" th:errors="*{shelfLocation}"></p>
+                <input id="shelfLocation" type="text" th:field="*{shelfLocation}" placeholder="A-01" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{shelfLocation}"></p>
             </div>
         </div>
 
