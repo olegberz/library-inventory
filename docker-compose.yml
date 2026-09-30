@@ -14,10 +14,13 @@ services:
       - db_data:/var/lib/mysql
       - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot_pass"]
+      # 127.0.0.1 forces a TCP check: during the first start MySQL runs init.sql on a
+      # temporary server without networking, and "localhost" (socket) would report healthy too early
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-uroot", "-proot_pass"]
       interval: 5s
       timeout: 5s
-      retries: 20
+      retries: 30
+      start_period: 20s
 
   app:
     build: .
@@ -32,6 +35,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: on-failure         # extra safety: retry if the database is still starting
 
 volumes:
   db_data:
