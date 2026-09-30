@@ -19,5 +19,19 @@ services:
       timeout: 5s
       retries: 20
 
+  app:
+    build: .
+    container_name: library-app
+    profiles: ["full"]          # started only with: docker compose --profile full up
+    environment:
+      DB_URL: jdbc:mysql://db:3306/library_db
+      DB_USER: library_user
+      DB_PASSWORD: library_pass
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db_data:
