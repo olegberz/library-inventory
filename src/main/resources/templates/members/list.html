@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Members')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('members')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="page-head">
+        <h1>Members</h1>
+        <a class="btn primary" th:href="@{/members/new}">Add member</a>
+    </div>
+
+    <table th:if="${!members.isEmpty()}">
+        <thead>
+        <tr><th>Last name</th><th>First name</th><th>E-mail</th><th>Phone</th><th>Registered</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="member : ${members}">
+            <td th:text="${member.lastName}">Last</td>
+            <td th:text="${member.firstName}">First</td>
+            <td th:text="${member.email}">mail</td>
+            <td th:text="${member.phone}">phone</td>
+            <td th:text="${#temporals.format(member.registeredOn, 'dd.MM.yyyy')}">01.01.2026</td>
+            <td class="actions">
+                <a class="btn small" th:href="@{/members/{id}/edit(id=${member.id})}">Edit</a>
+                <form th:action="@{/members/{id}/delete(id=${member.id})}" method="post"
+                      onsubmit="return confirm('Delete this member?');">
+                    <button class="btn small danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${members.isEmpty()}" class="empty">No members yet.</p>
+</main>
+</body>
+</html>

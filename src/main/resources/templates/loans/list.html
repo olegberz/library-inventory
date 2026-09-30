@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Loans')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('loans')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="page-head">
+        <h1>Loans</h1>
+        <a class="btn primary" th:href="@{/loans/new}">Issue book</a>
+    </div>
+
+    <table th:if="${!loans.isEmpty()}">
+        <thead>
+        <tr><th>Book</th><th>Member</th><th>Loan date</th><th>Due date</th><th>Returned</th><th>Status</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="loan : ${loans}">
+            <td th:text="${loan.book.title}">Book</td>
+            <td th:text="${loan.member.fullName}">Member</td>
+            <td th:text="${#temporals.format(loan.loanDate, 'dd.MM.yyyy')}">01.09.2026</td>
+            <td th:text="${#temporals.format(loan.dueDate, 'dd.MM.yyyy')}">15.09.2026</td>
+            <td th:text="${loan.returnDate != null} ? ${#temporals.format(loan.returnDate, 'dd.MM.yyyy')} : ''"></td>
+            <td><span class="status"
+                      th:classappend="${loan.status == 'Overdue'} ? 'overdue' : (${loan.status == 'Returned'} ? 'returned' : 'onloan')"
+                      th:text="${loan.status}">On loan</span></td>
+            <td class="actions">
+                <form th:if="${loan.active}" th:action="@{/loans/{id}/return(id=${loan.id})}" method="post">
+                    <button class="btn small" type="submit">Return</button>
+                </form>
+                <a class="btn small" th:href="@{/loans/{id}/edit(id=${loan.id})}">Edit</a>
+                <form th:action="@{/loans/{id}/delete(id=${loan.id})}" method="post"
+                      onsubmit="return confirm('Delete this loan record?');">
+                    <button class="btn small danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${loans.isEmpty()}" class="empty">No loans yet.</p>
+</main>
+</body>
+</html>

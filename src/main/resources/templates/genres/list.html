@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Genres')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('genres')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="page-head">
+        <h1>Genres</h1>
+        <a class="btn primary" th:href="@{/genres/new}">Add genre</a>
+    </div>
+
+    <table th:if="${!genres.isEmpty()}">
+        <thead>
+        <tr><th>Name</th><th>Description</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="genre : ${genres}">
+            <td th:text="${genre.name}">Name</td>
+            <td th:text="${genre.description}">Description</td>
+            <td class="actions">
+                <a class="btn small" th:href="@{/genres/{id}/edit(id=${genre.id})}">Edit</a>
+                <form th:action="@{/genres/{id}/delete(id=${genre.id})}" method="post"
+                      onsubmit="return confirm('Delete this genre?');">
+                    <button class="btn small danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${genres.isEmpty()}" class="empty">No genres yet.</p>
+</main>
+</body>
+</html>

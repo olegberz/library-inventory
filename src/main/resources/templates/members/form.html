@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${formTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('members')}"></header>
+
+<main class="container narrow">
+    <h1 th:text="${formTitle}">Add member</h1>
+
+    <form class="edit-form" th:action="@{${formAction}}" th:object="${member}" method="post" novalidate>
+        <div class="alert error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></div>
+
+        <div class="row two">
+            <div>
+                <label for="firstName">First name</label>
+                <input id="firstName" type="text" th:field="*{firstName}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{firstName}"></p>
+            </div>
+            <div>
+                <label for="lastName">Last name</label>
+                <input id="lastName" type="text" th:field="*{lastName}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{lastName}"></p>
+            </div>
+        </div>
+
+        <label for="email">E-mail</label>
+        <input id="email" type="text" th:field="*{email}" th:errorclass="invalid">
+        <p class="field-error" th:errors="*{email}"></p>
+
+        <div class="row two">
+            <div>
+                <label for="phone">Phone <span class="hint">(optional)</span></label>
+                <input id="phone" type="text" th:field="*{phone}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{phone}"></p>
+            </div>
+            <div>
+                <label for="registeredOn">Registered on <span class="hint">(empty = today)</span></label>
+                <input id="registeredOn" type="date" th:field="*{registeredOn}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{registeredOn}"></p>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn primary" type="submit">Save</button>
+            <a class="btn" th:href="@{/members}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

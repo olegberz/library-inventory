@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${formTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('loans')}"></header>
+
+<main class="container narrow">
+    <h1 th:text="${formTitle}">Issue book</h1>
+
+    <form class="edit-form" th:action="@{${formAction}}" th:object="${loan}" method="post" novalidate>
+        <div class="alert error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></div>
+
+        <label for="book">Book</label>
+        <select id="book" name="book" th:classappend="${#fields.hasErrors('book')} ? 'invalid'">
+            <option value="">– choose book –</option>
+            <option th:each="b : ${books}" th:value="${b.id}"
+                    th:text="${b.title} + ' (' + ${available[b.id]} + ' of ' + ${b.quantity} + ' free)'"
+                    th:selected="${loan.book != null and loan.book.id == b.id}">Book</option>
+        </select>
+        <p class="field-error" th:errors="*{book}"></p>
+
+        <label for="member">Member</label>
+        <select id="member" name="member" th:classappend="${#fields.hasErrors('member')} ? 'invalid'">
+            <option value="">– choose member –</option>
+            <option th:each="m : ${members}" th:value="${m.id}" th:text="${m.fullName} + ' (' + ${m.email} + ')'"
+                    th:selected="${loan.member != null and loan.member.id == m.id}">Member</option>
+        </select>
+        <p class="field-error" th:errors="*{member}"></p>
+
+        <div class="row" th:classappend="${editing} ? '' : 'two'">
+            <div>
+                <label for="loanDate">Loan date</label>
+                <input id="loanDate" type="date" th:field="*{loanDate}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{loanDate}"></p>
+            </div>
+            <div>
+                <label for="dueDate">Due date</label>
+                <input id="dueDate" type="date" th:field="*{dueDate}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{dueDate}"></p>
+            </div>
+            <div th:if="${editing}">
+                <label for="returnDate">Returned <span class="hint">(empty = on loan)</span></label>
+                <input id="returnDate" type="date" th:field="*{returnDate}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{returnDate}"></p>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn primary" type="submit">Save</button>
+            <a class="btn" th:href="@{/loans}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${formTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('authors')}"></header>
+
+<main class="container narrow">
+    <h1 th:text="${formTitle}">Add author</h1>
+
+    <form class="edit-form" th:action="@{${formAction}}" th:object="${author}" method="post" novalidate>
+        <div class="alert error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></div>
+
+        <div class="row two">
+            <div>
+                <label for="firstName">First name</label>
+                <input id="firstName" type="text" th:field="*{firstName}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{firstName}"></p>
+            </div>
+            <div>
+                <label for="lastName">Last name</label>
+                <input id="lastName" type="text" th:field="*{lastName}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{lastName}"></p>
+            </div>
+        </div>
+
+        <div class="row two">
+            <div>
+                <label for="country">Country <span class="hint">(optional)</span></label>
+                <input id="country" type="text" th:field="*{country}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{country}"></p>
+            </div>
+            <div>
+                <label for="birthYear">Birth year <span class="hint">(optional)</span></label>
+                <input id="birthYear" type="number" th:field="*{birthYear}" th:errorclass="invalid">
+                <p class="field-error" th:errors="*{birthYear}"></p>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn primary" type="submit">Save</button>
+            <a class="btn" th:href="@{/authors}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

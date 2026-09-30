@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${formTitle})}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('genres')}"></header>
+
+<main class="container narrow">
+    <h1 th:text="${formTitle}">Add genre</h1>
+
+    <form class="edit-form" th:action="@{${formAction}}" th:object="${genre}" method="post" novalidate>
+        <div class="alert error" th:if="${#fields.hasGlobalErrors()}" th:errors="*{global}"></div>
+
+        <label for="name">Name</label>
+        <input id="name" type="text" th:field="*{name}" th:errorclass="invalid">
+        <p class="field-error" th:errors="*{name}"></p>
+
+        <label for="description">Description <span class="hint">(optional)</span></label>
+        <input id="description" type="text" th:field="*{description}" th:errorclass="invalid">
+        <p class="field-error" th:errors="*{description}"></p>
+
+        <div class="form-actions">
+            <button class="btn primary" type="submit">Save</button>
+            <a class="btn" th:href="@{/genres}">Cancel</a>
+        </div>
+    </form>
+</main>
+</body>
+</html>

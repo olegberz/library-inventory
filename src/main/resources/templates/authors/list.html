@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head('Authors')}"></head>
+<body>
+<header th:replace="~{fragments/layout :: header('authors')}"></header>
+
+<main class="container">
+    <div th:replace="~{fragments/layout :: messages}"></div>
+
+    <div class="page-head">
+        <h1>Authors</h1>
+        <a class="btn primary" th:href="@{/authors/new}">Add author</a>
+    </div>
+
+    <table th:if="${!authors.isEmpty()}">
+        <thead>
+        <tr><th>Last name</th><th>First name</th><th>Country</th><th class="num">Born</th><th></th></tr>
+        </thead>
+        <tbody>
+        <tr th:each="author : ${authors}">
+            <td th:text="${author.lastName}">Last</td>
+            <td th:text="${author.firstName}">First</td>
+            <td th:text="${author.country}">Country</td>
+            <td class="num" th:text="${author.birthYear}">1950</td>
+            <td class="actions">
+                <a class="btn small" th:href="@{/authors/{id}/edit(id=${author.id})}">Edit</a>
+                <form th:action="@{/authors/{id}/delete(id=${author.id})}" method="post"
+                      onsubmit="return confirm('Delete this author?');">
+                    <button class="btn small danger" type="submit">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+    <p th:if="${authors.isEmpty()}" class="empty">No authors yet.</p>
+</main>
+</body>
+</html>
